@@ -5,10 +5,10 @@
 ### Getting Started
 - [Quick Start Decision Tree](#quick-start) - Start here for immediate guidance
 - [Core Principle](#core-principle) - Why access patterns matter
-- [Three Fundamental Architectures](#architectures) - Overview of approaches
+- [Three Fundamental Architectures](#three-fundamental-architectures) - Overview of approaches
 
 ### Key Decisions
-- [**Critical: Store Full Documents?**](#store-full-documents) - Most important cost decision
+- [**Critical: Store Full Documents?**](#critical-decision-store-full-documents) - Most important cost decision
 - [Decision Framework](#decision-framework) - Step-by-step architecture selection
   - [Step 1: Identify Access Patterns](#step-1-identify-your-access-patterns)
   - [Step 2: Map to Architecture](#step-2-map-patterns-to-architecture)
@@ -23,7 +23,7 @@
 - [Chunk Linking & Cross-References](#chunk-linking--cross-references) - For pure flattening/hybrid
   - [Navigation Patterns](#navigation-patterns)
   - [Reference Types](#reference-types)
-  - [Best Practices](#best-practices-1)
+  - [Best Practices](#best-practices)
 
 ### Reference
 - [Configuration Schema](#configuration-schema) - Conceptual examples
@@ -35,7 +35,7 @@
 
 ---
 
-## Quick Start {#quick-start}
+## Quick Start
 
 **Start here if you want immediate guidance:**
 
@@ -63,7 +63,7 @@ Do you have a source database (MongoDB, Postgres, etc.)?
 
 ---
 
-## Core Principle {#core-principle}
+## Core Principle
 
 **There is no single "optimal" architecture for hierarchical JSON in vector databases. The right structure depends entirely on your access patterns.**
 
@@ -71,7 +71,7 @@ This document provides a decision framework to choose the optimal architecture b
 
 ---
 
-## Three Fundamental Architectures {#architectures}
+## Three Fundamental Architectures
 
 ### 1. Hierarchical (Keep Nested)
 Store JSON as-is with minimal flattening.
@@ -134,7 +134,7 @@ Split into entity-level chunks with separate embeddings.
 
 ---
 
-## Critical Decision: Store Full Documents? {#store-full-documents}
+## Critical Decision: Store Full Documents?
 
 **This is the most important cost decision you'll make.**
 
@@ -235,7 +235,7 @@ full_docs = mongodb.find({"_id": {"$in": order_ids}})
 
 ---
 
-## Decision Framework {#decision-framework}
+## Decision Framework
 
 ### Step 1: Identify Your Access Patterns
 
@@ -287,9 +287,9 @@ flowchart TD
 
 ---
 
-## Practical Examples {#practical-examples}
+## Practical Examples
 
-### Example 1: E-Commerce Orders {#example-1-e-commerce-orders}
+### Example 1: E-Commerce Orders
 
 **Access pattern distribution**:
 - 35% - "Orders from state X"
@@ -359,7 +359,7 @@ revenue_by_state = aggregate(
 
 ---
 
-### Example 2: Healthcare Records {#example-2-healthcare-records}
+### Example 2: Healthcare Records
 
 **Access pattern distribution**:
 - 40% - "Patients with lab X > Y"
@@ -438,7 +438,7 @@ similar = vector_db.search(
 
 ---
 
-## Chunk Linking & Cross-References {#chunk-linking--cross-references}
+## Chunk Linking & Cross-References
 
 **Only needed for Pure Flattening or Hybrid approaches.**
 
@@ -522,7 +522,7 @@ graph TD
 }
 ```
 
-### Navigation Patterns {#navigation-patterns}
+### Navigation Patterns
 
 **1. Drill-Down (Parent → Children)**
 ```python
@@ -559,7 +559,7 @@ all_chunks = vector_db.search(filter={"order_id": 12345})
 # Returns all chunks regardless of type
 ```
 
-### Reference Types {#reference-types}
+### Reference Types
 
 | Reference Type | Direction | Use Case | Example |
 |----------------|-----------|----------|---------|
@@ -568,7 +568,7 @@ all_chunks = vector_db.search(filter={"order_id": 12345})
 | `related_*_id` | Sibling → Sibling | Cross-entity links | Item → Fulfillment |
 | `root_id` | Any → Root | Fetch all related | Any chunk → Order ID |
 
-### Best Practices {#best-practices-1}
+### Best Practices
 
 1. **Always include root ID**: Every chunk should have the root document ID for easy filtering
 2. **Denormalize common lookups**: Store frequently accessed references directly (e.g., customer_id in line items)
@@ -589,7 +589,7 @@ all_chunks = vector_db.search(filter={"order_id": 12345})
 
 ---
 
-## Configuration Schema {#configuration-schema}
+## Configuration Schema
 
 **Note**: This is a conceptual example showing how you might structure transformation decisions. This is NOT executable code.
 
@@ -651,7 +651,7 @@ entities:
 
 ---
 
-## Architecture Comparison Table {#architecture-comparison-table}
+## Architecture Comparison Table
 
 | Criteria | Hierarchical | Selective Flattening | Pure Flattening |
 |----------|--------------|---------------------|-----------------|
@@ -667,7 +667,7 @@ entities:
 
 ---
 
-## Quick Decision Checklist {#quick-decision-checklist}
+## Quick Decision Checklist
 
 **Use Hierarchical if**:
 - [ ] "Get by ID" is >50% of queries
@@ -695,7 +695,7 @@ entities:
 
 ---
 
-## Common Pitfalls {#common-pitfalls}
+## Common Pitfalls
 
 ❌ **Don't**: Flatten everything by default
 ✅ **Do**: Start hierarchical, flatten only what you filter/search on
@@ -714,7 +714,7 @@ entities:
 
 ---
 
-## Vector Database Implementation {#vector-database-implementation}
+## Vector Database Implementation
 
 This framework is designed for **Qdrant**, though the principles apply to other vector databases.
 
@@ -734,7 +734,7 @@ This framework is designed for **Qdrant**, though the principles apply to other 
 
 ---
 
-## Further Reading {#further-reading}
+## Further Reading
 
 ### Implementation Examples
 - **Shopify Orders**: See `shopify-implementation-example.md` - Complete e-commerce example with selective flattening
