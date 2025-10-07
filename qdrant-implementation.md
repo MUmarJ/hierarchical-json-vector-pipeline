@@ -10,7 +10,6 @@
 - [Query Patterns](#query-patterns)
 - [Optimizations](#optimizations)
 - [Performance Benchmarks](#performance-benchmarks)
-- [Production Considerations](#production-considerations)
 
 ---
 
@@ -189,7 +188,6 @@ But: Growing rapidly, active development.
 | **Self-hosted** | ✅ Docker/K8s | ❌ No | ✅ Docker/K8s | ✅ Postgres ext | ✅ Docker/K8s |
 | **Horizontal scaling** | ⚠️ Manual sharding | ✅ Automatic | ✅ Automatic | ⚠️ Postgres limits | ✅ Automatic |
 | **Cost (1M vectors)** | ~$50-100/mo | ~$70-150/mo | ~$60-120/mo | ~$30-80/mo | ~$40-100/mo |
-| **Best for pipeline** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
 
 ### Detailed Comparison
 
@@ -1093,159 +1091,6 @@ results = client.scroll(
 
 ---
 
-## Production Considerations
-
-### Deployment
-
-#### Docker Compose (Development)
-
-```yaml
-version: '3.8'
-services:
-  qdrant:
-    image: qdrant/qdrant:latest
-    ports:
-      - "6333:6333"
-      - "6334:6334"  # gRPC
-    volumes:
-      - ./qdrant_storage:/qdrant/storage
-    environment:
-      - QDRANT__SERVICE__HTTP_PORT=6333
-      - QDRANT__SERVICE__GRPC_PORT=6334
-```
-
-#### Kubernetes (Production)
-
-```yaml
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: qdrant
-spec:
-  serviceName: qdrant
-  replicas: 3
-  selector:
-    matchLabels:
-      app: qdrant
-  template:
-    metadata:
-      labels:
-        app: qdrant
-    spec:
-      containers:
-      - name: qdrant
-        image: qdrant/qdrant:v1.7.0
-        ports:
-        - containerPort: 6333
-          name: http
-        - containerPort: 6334
-          name: grpc
-        volumeMounts:
-        - name: qdrant-storage
-          mountPath: /qdrant/storage
-        resources:
-          requests:
-            memory: "8Gi"
-            cpu: "2"
-          limits:
-            memory: "16Gi"
-            cpu: "4"
-  volumeClaimTemplates:
-  - metadata:
-      name: qdrant-storage
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 100Gi
-```
-
-### Monitoring
-
-**Key metrics to track**:
-
-```python
-# Collection info
-info = client.get_collection("shopify_orders")
-print(f"Vectors count: {info.vectors_count}")
-print(f"Points count: {info.points_count}")
-print(f"Segments count: {info.segments_count}")
-
-# Custom metrics (integrate with Prometheus)
-metrics = {
-    "query_latency_p50": 30,  # ms
-    "query_latency_p95": 80,
-    "query_latency_p99": 150,
-    "ingestion_rate": 2000,  # points/sec
-    "error_rate": 0.001,  # 0.1%
-    "storage_used": 13,  # GB
-}
-```
-
-**Alerting thresholds**:
-- Query latency p95 > 200ms
-- Ingestion rate < 500 points/sec
-- Error rate > 1%
-- Storage > 80% capacity
-- Memory usage > 85%
-
-### Backup & Recovery
-
-```bash
-# Backup collection
-qdrant-backup create \
-  --collection-name shopify_orders \
-  --output /backups/shopify_orders_20240315.tar.gz
-
-# Restore collection
-qdrant-backup restore \
-  --collection-name shopify_orders \
-  --input /backups/shopify_orders_20240315.tar.gz
-```
-
-### Security
-
-**1. Enable authentication**:
-
-```yaml
-# config.yaml
-service:
-  api_key: ${QDRANT_API_KEY}
-```
-
-**2. TLS encryption**:
-
-```yaml
-# config.yaml
-service:
-  enable_tls: true
-  cert_path: /path/to/cert.pem
-  key_path: /path/to/key.pem
-```
-
-**3. Network policies** (Kubernetes):
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: qdrant-network-policy
-spec:
-  podSelector:
-    matchLabels:
-      app: qdrant
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: api-server
-    ports:
-    - protocol: TCP
-      port: 6333
-```
-
 ### HIPAA Compliance (Healthcare)
 
 For FHIR healthcare use case:
@@ -1499,9 +1344,6 @@ filter=Filter(
 
 For complete working examples, see:
 - `examples/shopify_qdrant.py` - E-commerce implementation
-- `examples/fhir_qdrant.py` - Healthcare implementation
-- `configs/qdrant_shopify.yaml` - Configuration templates
-
 ---
 
 ## Additional Resources
