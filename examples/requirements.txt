@@ -1,0 +1,5 @@
+# Requirements pinned for compatibility with Python 3.11
+qdrant-client==1.9.1
+openai==1.35.12
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
