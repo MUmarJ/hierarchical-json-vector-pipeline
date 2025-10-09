@@ -1,5 +1,17 @@
-# Requirements pinned for compatibility with Python 3.11
-qdrant-client==1.9.1
-openai==1.35.12
-psycopg2-binary==2.9.9
+# Python 3.11+ Requirements
+# Core dependencies only - transitive dependencies handled automatically
+
+# Vector Database
+qdrant-client==1.11.3
+
+# Embeddings
+openai==1.51.2
+
+# Database Adapters
+psycopg2-binary==2.9.10
+
+# FHIR Resources (Healthcare example)
+fhir.resources==7.1.0
+
+# Environment Variables
 python-dotenv==1.0.1
