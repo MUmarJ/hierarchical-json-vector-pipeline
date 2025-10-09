@@ -736,10 +736,6 @@ This framework is designed for **Qdrant**, though the principles apply to other 
 
 ## Further Reading
 
-### Implementation Examples
-- **Shopify Orders**: See `shopify-implementation-example.md` - Complete e-commerce example with selective flattening
-- **Healthcare FHIR**: See `fhir-healthcare-implementation.md` - Clinical data with hybrid approach
-
 ### Technical Deep-Dives
 - **Qdrant Implementation**: See `qdrant-implementation.md` - Collection setup, queries, benchmarks
 - **Vector DB Comparison**: Architecture choices depend on vector DB capabilities
